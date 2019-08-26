@@ -19,7 +19,7 @@ public class UserController {
     public UserService userService;
 
     //API trả về List User.
-    @RequestMapping(value = "/caro-users", method = RequestMethod.GET)
+    @RequestMapping(value = "/users", method = RequestMethod.GET)
     public ResponseEntity<List<User>> listAllUsers() {
         List<User> users = userService.findAll();
         if (users.isEmpty()) {
@@ -29,7 +29,7 @@ public class UserController {
     }
 
     //API trả về User có ID trên url.
-    @RequestMapping(value = "/caro-users/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/users/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<User> getUserById(@PathVariable("id") long id) {
         System.out.println("Fetching User with id " + id);
         User user = userService.findById(id);
@@ -41,7 +41,7 @@ public class UserController {
     }
 
     //API tạo một User mới.
-    @RequestMapping(value = "/caro-users", method = RequestMethod.POST)
+    @RequestMapping(value = "/users", method = RequestMethod.POST)
     public ResponseEntity<Void> createUser(@RequestBody User user, UriComponentsBuilder ucBuilder) {
         System.out.println("Creating User " + user.getUsername());
         userService.createUser(user);
@@ -51,7 +51,7 @@ public class UserController {
     }
 
     //API cập nhật một User với ID trên url.
-    @RequestMapping(value = "/caro-users/{id}", method = RequestMethod.PATCH)
+    @RequestMapping(value = "/users/{id}", method = RequestMethod.PATCH)
     public ResponseEntity<User> updateUser(@PathVariable("id") long id, @RequestBody User user) {
         System.out.println("Updating User " + id);
 
@@ -80,7 +80,7 @@ public class UserController {
     }
 
     //API xóa một User với ID trên url.
-    @RequestMapping(value = "/caro-users/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/users/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<User> deleteUser(@PathVariable("id") long id) {
         System.out.println("Fetching & Deleting User with id " + id);
 
