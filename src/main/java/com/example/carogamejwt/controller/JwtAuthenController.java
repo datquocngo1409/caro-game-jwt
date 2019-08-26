@@ -55,8 +55,9 @@ public class JwtAuthenController {
             User userSave = new User(user.getUsername(), user.getPassword());
             userService.createUser(userSave);
             return ResponseEntity.ok(userDetailsService.save(user));
+        } else {
+            return ResponseEntity.ok(null);
         }
-        return ResponseEntity.ok(null);
     }
 
     private void authenticate(String username, String password) throws Exception {
