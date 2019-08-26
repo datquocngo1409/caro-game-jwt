@@ -4,6 +4,7 @@ import com.example.carogamejwt.config.JwtTokenUtil;
 import com.example.carogamejwt.model.JwtRequest;
 import com.example.carogamejwt.model.JwtResponse;
 import com.example.carogamejwt.model.RequestUser;
+import com.example.carogamejwt.model.User;
 import com.example.carogamejwt.service.UserService;
 import com.example.carogamejwt.service.impl.JwtUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -43,9 +46,17 @@ public class JwtAuthenController {
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
     public ResponseEntity<?> saveUser(@RequestBody RequestUser user) throws Exception {
-//        User userSave = new User(user.getUsername(), user.getPassword());
-//        userService.createUser(userSave);
-        return ResponseEntity.ok(userDetailsService.save(user));
+        List<User> users = userService.findAll();
+        boolean isExit = false;
+        for (User userFor : users) {
+            if (userFor.getUsername().equals(user.getUsername())) isExit = true;
+        }
+        if (isExit = false) {
+            User userSave = new User(user.getUsername(), user.getPassword());
+            userService.createUser(userSave);
+            return ResponseEntity.ok(userDetailsService.save(user));
+        }
+        return ResponseEntity.ok(null);
     }
 
     private void authenticate(String username, String password) throws Exception {
