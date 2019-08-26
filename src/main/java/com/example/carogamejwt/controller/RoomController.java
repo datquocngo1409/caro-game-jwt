@@ -1,0 +1,100 @@
+package com.example.carogamejwt.controller;
+
+import com.example.carogamejwt.model.Room;
+import com.example.carogamejwt.service.RoomService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin
+public class RoomController {
+    @Autowired
+    public RoomService roomService;
+
+    //API trả về List Room.
+    @RequestMapping(value = "/rooms", method = RequestMethod.GET)
+    public ResponseEntity<List<Room>> listAllRooms() {
+        List<Room> rooms = roomService.findAll();
+        if (rooms.isEmpty()) {
+            return new ResponseEntity<List<Room>>(HttpStatus.NO_CONTENT);//You many decide to return HttpStatus.NOT_FOUND
+        }
+        return new ResponseEntity<List<Room>>(rooms, HttpStatus.OK);
+    }
+
+    //API trả về Room có ID trên url.
+    @RequestMapping(value = "/rooms/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Room> getRoomById(@PathVariable("id") long id) {
+        System.out.println("Fetching Room with id " + id);
+        Room room = roomService.findById(id);
+        if (room == null) {
+            System.out.println("Room with id " + id + " not found");
+            return new ResponseEntity<Room>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<Room>(room, HttpStatus.OK);
+    }
+
+    //API tạo một Room mới.
+    @RequestMapping(value = "/rooms", method = RequestMethod.POST)
+    public ResponseEntity<Void> createRoom(@RequestBody Room room, UriComponentsBuilder ucBuilder) {
+        System.out.println("Creating Room " + room.getId());
+        roomService.createRoom(room);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(ucBuilder.path("/rooms/{id}").buildAndExpand(room.getId()).toUri());
+        return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
+    }
+
+    //API cập nhật một Room với ID trên url.
+    @RequestMapping(value = "/rooms/{id}", method = RequestMethod.PATCH)
+    public ResponseEntity<Room> updateRoom(@PathVariable("id") long id, @RequestBody Room room) {
+        System.out.println("Updating User " + id);
+
+        Room currentRoom = roomService.findById(id);
+
+        if (currentRoom == null) {
+            System.out.println("Room with id " + id + " not found");
+            return new ResponseEntity<Room>(HttpStatus.NOT_FOUND);
+        }
+
+        currentRoom.setId(room.getId());
+        currentRoom.setPassword(room.getPassword());
+        currentRoom.setFirstUser(room.getFirstUser());
+        currentRoom.setSecondUser(room.getSecondUser());
+
+        roomService.updateRoom(currentRoom);
+        return new ResponseEntity<Room>(currentRoom, HttpStatus.OK);
+    }
+
+    //API xóa một Room với ID trên url.
+    @RequestMapping(value = "/rooms/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<Room> deleteUser(@PathVariable("id") long id) {
+        System.out.println("Fetching & Deleting Room with id " + id);
+
+        Room room = roomService.findById(id);
+        if (room == null) {
+            System.out.println("Unable to delete. Room with id " + id + " not found");
+            return new ResponseEntity<Room>(HttpStatus.NOT_FOUND);
+        }
+
+        roomService.deleteRoom(id);
+        return new ResponseEntity<Room>(HttpStatus.NO_CONTENT);
+    }
+
+//    @RequestMapping(value = "/usersname/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<User> getAvatarByName(@PathVariable("id") String id) {
+//        System.out.println("Fetching User with name " + id);
+//        User account = userService.findByName(id);
+//        if (account == null) {
+//            System.out.println("User with name " + id + " not found");
+//            return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
+//        }
+//        return new ResponseEntity<User>(account, HttpStatus.OK);
+//    }
+
+}
