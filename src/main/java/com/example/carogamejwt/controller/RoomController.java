@@ -1,7 +1,9 @@
 package com.example.carogamejwt.controller;
 
 import com.example.carogamejwt.model.Room;
+import com.example.carogamejwt.model.User;
 import com.example.carogamejwt.service.RoomService;
+import com.example.carogamejwt.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,7 +18,9 @@ import java.util.List;
 @CrossOrigin
 public class RoomController {
     @Autowired
-    public RoomService roomService;
+    private RoomService roomService;
+    @Autowired
+    private UserService userService;
 
     //API trả về List Room.
     @RequestMapping(value = "/rooms", method = RequestMethod.GET)
@@ -50,10 +54,46 @@ public class RoomController {
         return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
     }
 
+    @RequestMapping(value = "/rooms/join/{id}", method = RequestMethod.POST)
+    public ResponseEntity<Room> join(@PathVariable("id") long id, @RequestHeader(value = "Authorization") String token) {
+        Room currentRoom = roomService.findById(id);
+        token = token.substring(7);
+        User currentUser = userService.findByToken(token);
+        if (currentRoom.getFirstUser() == null) {
+            currentRoom.setFirstUser(currentUser);
+            roomService.updateRoom(currentRoom);
+            return new ResponseEntity<Room>(currentRoom, HttpStatus.OK);
+        } else if (currentRoom.getSecondUser() == null && currentRoom.getFirstUser() != currentUser) {
+            currentRoom.setSecondUser(currentUser);
+            roomService.updateRoom(currentRoom);
+            return new ResponseEntity<Room>(currentRoom, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<Room>(HttpStatus.IM_USED);
+        }
+    }
+
+    @RequestMapping(value = "/rooms/leave/{id}", method = RequestMethod.POST)
+    public ResponseEntity<Room> leave(@PathVariable("id") long id, @RequestHeader(value = "Authorization") String token) {
+        Room currentRoom = roomService.findById(id);
+        token = token.substring(7);
+        User currentUser = userService.findByToken(token);
+        if (currentUser == currentRoom.getFirstUser()) {
+            currentRoom.setFirstUser(null);
+            roomService.updateRoom(currentRoom);
+            return new ResponseEntity<Room>(currentRoom, HttpStatus.OK);
+        } else if (currentUser == currentRoom.getSecondUser()) {
+            currentRoom.setSecondUser(null);
+            roomService.updateRoom(currentRoom);
+            return new ResponseEntity<Room>(currentRoom, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<Room>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
     //API cập nhật một Room với ID trên url.
     @RequestMapping(value = "/rooms/{id}", method = RequestMethod.PATCH)
     public ResponseEntity<Room> updateRoom(@PathVariable("id") long id, @RequestBody Room room) {
-        System.out.println("Updating User " + id);
+        System.out.println("Updating Room " + id);
 
         Room currentRoom = roomService.findById(id);
 
