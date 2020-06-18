@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin
@@ -39,6 +40,18 @@ public class UserController {
         }
         return new ResponseEntity<User>(user, HttpStatus.OK);
     }
+
+    //API trả về User có ID trên url.
+    @RequestMapping(value = "/users/token", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<User> getUserByToken(@RequestParam Map<String,String> params) {
+        String token = params.get("token");
+        User user = userService.findByToken(token);
+        if (user == null) {
+            return new ResponseEntity<User>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<User>(user, HttpStatus.OK);
+    }
+
 
     //API tạo một User mới.
     @RequestMapping(value = "/users", method = RequestMethod.POST)
